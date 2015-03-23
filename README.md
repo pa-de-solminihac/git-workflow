@@ -4,39 +4,44 @@ Modèle d'utilisation de Git pour un workflow avec versions de développement, r
 
 __Attention__ : sauf mention contraire, les lignes de commandes ci-dessous sont à exécuter sur les versions des développeurs (donc jamais sur la version de recette et encore moins la version de production !)
 
+
 ## Développement dans des branches
 
 Le code est versionné en utilisant git en suivant le modèle suivant : 
 - la branche `master` correspond à la version de production
 - la branche `devel` correspond à la version de recette
+- le développement s'effectue dans des `feature_branches` : ce sont des branches qui divergent de `master`. 
 
-Le développement s'effectue dans des `feature_branches` : ce sont des branches qui divergent de master. On crée généralement une branche par ticket.
+On crée généralement une branche par ticket. Dans l'exemple ci-dessous, __123__ correspond au numéro du ticket auquel correspond la branche.
 
+__Création d'une `feature_branche`__
 ```bash
 git checkout master
 git pull
-git checkout -b wp_12_menage_comptes_test
+git checkout -b 123_ma_feature
 ```
+
 
 ## Mise en recette
 
-Une fois le développement terminé on les met en recette. Pour ce faire, on commence par s'assurer que notre `feature_branch` est à jour par rapport à `master`, puis on merge notre `feature_branch` dans `devel`.
+Une fois le développement terminé on les met en recette. Pour ce faire, on commence par s'assurer que notre `feature_branch` est à jour par rapport à `master` (pour ne pas merger du code obsolète, qui génèrerait des conflits), puis on merge notre `feature_branch` dans `devel`.
 
 ```bash
 # met à jour master
 git checkout master
 git pull
 
-# met à jour wp_12_menage_comptes_test par rapport à master
-git checkout wp_12_menage_comptes_test
+# met à jour 123_ma_feature par rapport à master
+git checkout 123_ma_feature
 git merge master
 
-# met à jour la recette et met en recette wp_12_menage_comptes_test
+# met à jour la recette et met en recette 123_ma_feature
 git checkout devel
 git pull
-git merge wp_12_menage_comptes_test
+git merge 123_ma_feature
 git push
 ```
+
 
 ## Mise en production
 
@@ -45,9 +50,10 @@ Pour mettre en production, on merge notre `feature_branch` dans `master`.
 ```bash
 git checkout master
 git pull
-git merge wp_12_menage_comptes_test
+git merge 123_ma_feature
 git push
 ```
+
 
 ## Contrôle après mise en production
 
@@ -69,9 +75,22 @@ git format-patch $(git merge-base devel master)..master --stdout | wc -l
 
 Il ne devrait pas y avoir de nouveautés à merger à cette étape.
 
+
 ### Avertissement
 
-__Attention__ : à aucun moment on ne doit merger `devel` (ou une branche qui en divergerait) dans notre `feature_branch` ! Il y a risque de mettre en production la version de recette sinon !
+__Attention__ : à aucun moment il ne devrait être nécessaire de merger `devel` (ou une branche qui en divergerait) dans notre `feature_branch` ! Il y a risque de mettre en production la version de recette sinon !
+
+On peut toutefois le faire consciemment, à condition que la branche `devel` ait bien été stabilisée, pour assurer d'éventuels points de synchronisation. On pourra alors détruire `devel` et la recréer, toujours en divergeant de `master`.
+
+
+## Philosophie
+
+Dans ce modèle, les `feature_branches` divergent `de master`. Cela permet d'avoir des branches toujours livrables, indépendamment les unes des autres. 
+
+Naturellement, plus on attend, plus elles s'éloignent de `master`. Pour qu'elles restent toujours livrables, il faut les tenir à jour par rapport à `master`. Autrement dit, régulièrement re-merger master dans les `feature_branches` qui en dérivent.
+
+Cela évite aussi d'avoir à résoudre plusieurs fois le même conflit dans plusieurs branches, je le fais systématiquement dans les étapes de mise en recette et mise en production.
+
 
 ## Mises à jour de la base de données
 
@@ -87,6 +106,7 @@ Elles devront pouvoir être appliquées à l'aide de la ligne de commande suivan
 ```bash
 mysql nom_de_la_base --show-warnings < database/updates/YYYYmmdd-HHMM-libelle.sql > database/updates/YYYYmmdd-HHMM-libelle.log
 ```
+
 
 ### Améliorations possibles
 
