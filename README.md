@@ -20,7 +20,7 @@ git checkout -b wp_12_menage_comptes_test
 
 ## Mise en recette
 
-Une fois le développement terminé on les met en recette. Pour ce faire, on commence par s'assurer que notre `feature_branch` est à jour par rapport à `master`, puis on merge notre `feature_branch` dans devel.
+Une fois le développement terminé on les met en recette. Pour ce faire, on commence par s'assurer que notre `feature_branch` est à jour par rapport à `master`, puis on merge notre `feature_branch` dans `devel`.
 
 ```bash
 # met à jour master
@@ -51,7 +51,7 @@ git push
 
 ## Contrôle après mise en production
 
-Après une mise en production, il est toujours utile de s'assurer que devel est le plus à jour possible par rapport à master, pour s'assurer qu'on n'a pas laissé des conflits à résoudre qui pourraient retomber sur les autres membres de l'équipe : 
+Après une mise en production, il est toujours utile de s'assurer que `devel` est le plus à jour possible par rapport à `master`, pour s'assurer qu'on n'a pas laissé des conflits à résoudre qui pourraient retomber sur les autres membres de l'équipe : 
 
 ```bash
 git checkout master && git pull
@@ -71,7 +71,7 @@ Il ne devrait pas y avoir de nouveautés à merger à cette étape.
 
 ### Avertissement
 
-__Attention__ : à aucun moment on ne doit merger devel (ou une branche qui en divergerait) dans notre feature_branch ! Il y a risque de mettre en production la version de recette sinon !
+__Attention__ : à aucun moment on ne doit merger `devel` (ou une branche qui en divergerait) dans notre `feature_branch` ! Il y a risque de mettre en production la version de recette sinon !
 
 ## Mises à jour de la base de données
 
@@ -103,6 +103,7 @@ L'idée est d'enregistrer en base un numéro de version `numversion` de la base 
 En cas de conflit ou de refus d'appliquer un script, il faudra mettre à jour le script (au moins en le renommant en upgrade-from-numversion+1.php par exemple).
 
 Pour aller plus loin on pourra : 
+
 - lorsqu'on détecte un nouveau scripts, alerter si son numversion est < numversion de la base de données
 - lorsqu'on détecte un nouveau scripts, alerter si son numversion est > numversion de la base de données 
-- utiliser les hooks de Git pour refuser un commit sur master qui impliquerait d'appliquer des scripts si ils ne sont pas en cohérence avec la base de données.
+- utiliser les hooks de Git pour refuser un commit sur `master` qui impliquerait d'appliquer des scripts si ils ne sont pas en cohérence avec la base de données.
