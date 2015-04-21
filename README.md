@@ -19,8 +19,8 @@ __Création d'une `feature_branche`__
 git checkout master
 git pull
 git checkout -b 123_ma_feature
+git push -u origin 123_ma_feature
 ```
-
 
 ## Mise en recette
 
