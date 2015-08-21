@@ -87,7 +87,7 @@ On peut toutefois le faire consciemment, à condition que la branche `devel` ait
 
 Une fois qu'on a mis notre `feature_branch` en production, on peut la supprimer :
 ```bash
-git branch -d feature_branch
+git branch -d 123_ma_feature
 ```
 
 
