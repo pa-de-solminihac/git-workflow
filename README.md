@@ -94,11 +94,11 @@ Cela évite aussi d'avoir à résoudre plusieurs fois le même conflit dans plus
 
 ## Mises à jour de la base de données
 
-- on les enregistre dans le dépot api-webportage, dans le dossier database/updates 
-- on les enregistre dans un fichier de la forme YYYYmmdd-HHMM-libelle.sql 
+- on les enregistre dans un dossier database/updates 
+- on les enregistre dans un fichier de la forme `YYYYmmdd-HHMM-libelle.sql`
 - on les enregistre dans la feature branch qui les implique
 - le fichier doit être au format UTF-8 sans BOM, avec retours à la ligne de type unix
-- le fichier doit commencer par SET NAMES 'utf8'; 
+- le fichier doit commencer par `SET NAMES 'utf8';`
 - il ne faut pas faire apparaître le nom de la base de donnée dans les requêtes
 
 Elles devront pouvoir être appliquées à l'aide de la ligne de commande suivante : 
