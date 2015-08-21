@@ -55,9 +55,9 @@ git push
 ```
 
 
-## Contrôle après mise en production
+### Contrôle après mise en production
 
-Après une mise en production, il est toujours utile de s'assurer que `devel` est le plus à jour possible par rapport à `master`, pour s'assurer qu'on n'a pas laissé des conflits à résoudre qui pourraient retomber sur les autres membres de l'équipe : 
+Après une mise en production, il faut vérifier que `devel` est le plus à jour possible par rapport à `master`, pour s'assurer qu'on n'a pas laissé des conflits à résoudre qui pourraient retomber sur les autres membres de l'équipe : 
 
 ```bash
 git checkout master && git pull
@@ -73,14 +73,22 @@ Autre méthode (à vérifier tout de même) :
 git format-patch $(git merge-base devel master)..master --stdout | wc -l
 ```
 
-Il ne devrait pas y avoir de nouveautés à merger à cette étape.
+Il ne devrait pas y avoir de nouveautés à merger à cette étape. S'il y en a c'est que quelqu'un utilise mal le workflow.
 
 
 ### Avertissement
 
 __Attention__ : à aucun moment il ne devrait être nécessaire de merger `devel` (ou une branche qui en divergerait) dans notre `feature_branch` ! Il y a risque de mettre en production la version de recette sinon !
 
-On peut toutefois le faire consciemment, à condition que la branche `devel` ait bien été stabilisée, pour assurer d'éventuels points de synchronisation. On pourra alors détruire `devel` et la recréer, toujours en divergeant de `master`.
+On peut toutefois le faire consciemment, à condition que la branche `devel` ait bien été stabilisée, pour assurer d'éventuels points de synchronisation. On pourrait alors détruire `devel` et la recréer, toujours en divergeant de `master`.
+
+
+### Ménage
+
+Une fois qu'on a mis notre `feature_branch` en production, on peut la supprimer :
+```bash
+git branch -d feature_branch
+```
 
 
 ## Philosophie
@@ -106,6 +114,7 @@ Elles devront pouvoir être appliquées à l'aide de la ligne de commande suivan
 ```bash
 mysql nom_de_la_base --show-warnings < database/updates/YYYYmmdd-HHMM-libelle.sql > database/updates/YYYYmmdd-HHMM-libelle.log
 ```
+
 
 
 ### Améliorations possibles
