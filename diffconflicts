@@ -1,69 +1,37 @@
-#!/bin/bash
-# A better vimdiff mergetool for Git
+#!/usr/bin/env bash
 #
-# Git does a great job resolving merge conflicts automatically but there are
-# times when human intervention is still needed. Git resolves all the conflicts
-# that it is able to and finally wraps each conflict it cannot resolve within
-# special markers which must be resolved by a human.
+# A better mergetool for Git
 #
-# The vertical format and lack of syntax highlighting in the plain conflict
-# marker layout makes it difficult to spot subtle conflicts such as
-# single-character changes and this is where a two-way diff really shines!
-# To see this explained using screenshots, see:
-# http://vim.wikia.com/wiki/A_better_Vimdiff_Git_mergetool
+# LOCAL refers to "your changes"
+# REMOTE refers to "incoming changes"
+# BASE refers to the "previous know version" (ie. the common ancestor for "incoming changes" and "your changes")
 #
-# This script, when used as a Git mergetool, opens each "side" of the conflict
-# markers in a two-way vimdiff window. This combines all the awesome of Git's
-# automatic merging savvy with the awesome and simplicity of a simple two-way
-# diff.
+# Tab1 is a two-way diff of just the conflicts.
+# Resolve the conflicts here (in the left window) and save the file.
+#     +-----------------------------------------------------------------+
+#     |  LOCAL Conflicts (solve here)  |        REMOTE conflicts        |
+#     +-----------------------------------------------------------------+
 #
-# Add this mergetool to your ~/.gitconfig (you can substitute gvim for vim):
+# Tab2 is a two-way diff of the REMOTE file (incoming changes) and the merge base (previous known version).
+#     +-----------------------------------------------------------------+
+#     |          REMOTE file           |           BASE file            |
+#     +-----------------------------------------------------------------+
 #
-# git config --global merge.tool diffconflicts
-# git config --global mergetool.diffconflicts.cmd 'diffconflicts vim $BASE $LOCAL $REMOTE $MERGED'
-# git config --global mergetool.diffconflicts.trustExitCode true
-# git config --global mergetool.diffconflicts.keepBackup false
-#
-# The next time you perform a merge with conflicts, invoke this tool with the
-# following command. (Of course you can set it as your default mergetool as
-# well.)
-#
-#   git mergetool --tool diffconflicts
-#
-# This tool will open three tabs in Vim that each provide a different way to
-# view the conflicts. You can resolve the conflicts in the first tab and save
-# and exit the file. This will also mark the conflict as resolved in Git.
-#
-#   Tab1 is a two-way diff of just the conflicts. Resolve the conflicts here
-#   and save the file.
-#       +--------------------------------+
-#       |    LCONFL     |    RCONFL      |
-#       +--------------------------------+
-#   Tab2 is a three-way diff of the original files and the merge base. This is
-#   the traditional three-way diff. Although noisy, it is occasionally useful
-#   to view the three original states of the conflicting file before the merge.
-#       +--------------------------------+
-#       |  LOCAL   |   BASE   |  REMOTE  |
-#       +--------------------------------+
-#   Tab3 is the in-progress merge that Git has written to the filesystem
-#   containing the conflict markers. I.e., the file you would normally edit by
-#   hand when not using a mergetool.
-#       +--------------------------------+
-#       |       <<<<<<< HEAD             |
-#       |        LCONFL                  |
-#       |       =======                  |
-#       |        RCONFL                  |
-#       |       >>>>>>> someref          |
-#       +--------------------------------+
+# Tab3 is a two-way diff of the LOCAL file (your changes) and the merge base (previous known version).
+#     +-----------------------------------------------------------------+
+#     |           LOCAL file           |           BASE file            |
+#     +-----------------------------------------------------------------+
 #
 # Workflow:
 #
-# 1.    Save your changes to the LCONFL temporary file (the left window on the
-#       first tab; also the only file that isn't read-only).
+# 1.    Save your changes to the Local conflicts" window
+#       (first window in first tab; also the only file that isn't read-only).
+#
 # 2.    The LOCAL, BASE, and REMOTE versions of the file are available in the
-#       second tabpage if you want to look at them.
-# 3.    When vimdiff exits cleanly, the file containing the conflict markers
-#       will be updated with the contents of your LCONFL file edits.
+#       next tabs if you want to look at them.
+#
+# 3.    To PROCESS the merge, use :wqa
+#       To ABORT   the merge, use :cq
 #
 # NOTE: Use :cq to abort the merge and exit Vim with an error code.
 
@@ -89,21 +57,22 @@ type $GNU_SED >/dev/null 2>&1 || GNU_SED="sed"
 # Temporary files for left and right side
 MERGED_PATH="$(dirname ${MERGED})"
 MERGED_FILE="$(basename ${MERGED})"
-LCONFL="${MERGED_PATH}/.REMOTE.$$.${MERGED_FILE}"
-RCONFL="${MERGED_PATH}/.LOCAL.$$.${MERGED_FILE}"
+RCONFL="${MERGED_PATH}/.CONFLICTS_REMOTE.$$.${MERGED_FILE}"
+LCONFL="${MERGED_PATH}/.CONFLICTS_LOCAL.$$.${MERGED_FILE}"
 
 # Always delete our temp files; Git will handle it's own temp files
-trap 'rm -f "'"${LCONFL}"'" "'"${RCONFL}"'"' SIGINT SIGTERM EXIT
+trap 'rm -f "'"${RCONFL}"'" "'"${LCONFL}"'"' SIGINT SIGTERM EXIT
 
 # Remove the conflict markers for each 'side' and put each into a temp file
-$GNU_SED -r -e '/^<<<<<<< /,/^=======\r?$/d' -e '/^>>>>>>> /d' "${MERGED}" > "${LCONFL}"
-$GNU_SED -r -e '/^=======\r?$/,/^>>>>>>> /d' -e '/^<<<<<<< /d' "${MERGED}" > "${RCONFL}"
+$GNU_SED -r -e '/^<<<<<<< /,/^=======\r?$/d' -e '/^>>>>>>> /d' "${MERGED}" > "${RCONFL}"
+$GNU_SED -r -e '/^=======\r?$/,/^>>>>>>> /d' -e '/^<<<<<<< /d' "${MERGED}" > "${LCONFL}"
 
 # Fire up vimdiff
 $cmd -f -R -d "${LCONFL}" "${RCONFL}" \
     -c ":set noro" \
-    -c ":tabe $QLOCAL" -c ":vert diffs $QBASE" -c ":vert diffs $QREMOTE" \
-    -c ":winc t" -c ":tabe $QMERGED" -c ":tabfir"
+    -c ":tabe $QBASE" -c ":vert diffs $QREMOTE" \
+    -c ":tabe $QBASE" -c ":vert diffs $QLOCAL" \
+    -c ":tabfir"
 
 EC=$?
 
