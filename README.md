@@ -102,37 +102,32 @@ Cela évite aussi d'avoir à résoudre plusieurs fois le même conflit dans plus
 
 ## Mises à jour de la base de données
 
-- on les enregistre dans un dossier database/updates 
-- on les enregistre dans un fichier de la forme `YYYYmmdd-HHMM-libelle.sql`
-- on les enregistre dans la feature branch qui les implique
-- le fichier doit être au format UTF-8 sans BOM, avec retours à la ligne de type unix
-- le fichier doit commencer par `SET NAMES 'utf8';`
-- il ne faut pas faire apparaître le nom de la base de donnée dans les requêtes
+Les scripts de mise à jour de la base de données doivent pouvoir être appliqués automatiquement. On les nomme de manière à ce que git nous prévienne si deux scripts de mise à jour risquent de rentrer en conflit.
 
-Elles devront pouvoir être appliquées à l'aide de la ligne de commande suivante : 
+Ainsi, la base de données doit contenir son propre numéro de version. L'outil appliquant la mise à jour automatiquement se chargera d'incrémenter ce numéro après avoir appliqué un script de mise à jour.
 
-```bash
-mysql nom_de_la_base --show-warnings < database/updates/YYYYmmdd-HHMM-libelle.sql > database/updates/YYYYmmdd-HHMM-libelle.log
-```
+Les scripts de mise à jour sont enregistrés :
+- dans la feature branch qui les nécessite
+- dans un dossier `database/updates` 
+- dans un fichier de la forme `n+1.sql` ou `n` est le numéro de version de la base de données sur laquelle le script doit s'appliquer
 
+Ces scripts :
+- sont au format UTF-8 sans BOM, avec retours à la ligne de type unix
+- commencent par `SET NAMES 'utf8';`
+- ne doivent pas faire apparaître le nom de la base de donnée dans les requêtes
 
+### Gestion des conflits
 
-### Améliorations possibles
+Considérons le cas où l'on a deux branches qui contiennent un script de mise à jour de base de données ayant le même nom.
 
-Les scripts de mise à jour de la base de données devraient pouvoir être appliqués automatiquement, avec rollback automatique en cas de problème. C'est l'objet du ticket https://github.com/B3Software/sud-convergences/issues/443 qui n'est hélas pas vraiment applicable tant que la base de données sera aussi lourde.
+Lorsqu'on va vouloir mettre en recette ces deux branches, git va lever un conflit puisque les deux scripts ont le même nom. La résolution de ce conflit __ne doit pas changer le nom du fichier__ de mise à jour. Au contraire, elle doit s'assurer d'intégrer harmonieusement les deux scripts en conflit.
 
-Réflexion en cours pour un outil permettant de gérer les upgrades de la base de données avec les branches de développement.
+Lorsqu'on mettra en production l'une de ces branches, et qu'on ira remerger master dans l'autre branche pour la tenir à jour (ce qu'on doit faire comme expliqué dans la section précédente nommée "Philosophie"), git va nous informer d'un conflit : on a sur master un fichier déjà nommé comme notre script de mise à jour. C'est à ce moment là seulement qu'on __renommera notre fichier de mise à jour en incrémentant son numéro__, après éventuelles adaptations.
 
-L'idée est d'enregistrer en base un numéro de version `numversion` de la base de données. Ce numéro sera incrémenté à chaque application d'un script. On pourra aussi enregistrer la liste des scripts d'upgrade appliqués ainsi que la date d'application pour faciliter le suivi.
+#### Raffinement
 
-- On nommera les scripts de migration ainsi : upgrade-from-numversion.php 
-- Pour savoir si on peut appliquer un script il suffira de vérifier si la base sur laquelle on veut l'appliquer est bien en version numversion. Si ce n'est pas le cas on refuse d'appliquer le script (ou la série de scripts l'incluant).
-- Si 2 scripts d'upgrade sont nommés identiquement upgrade-from-numversion.php, Git levera un conflit lors du merge de branches, ce qui alertera le développeur qu'il faut vérifier l'ordre d'application de ces 2 scripts. 
+On peut utiliser une branche intermédiaire entre les branches `master` et `devel` évoquées plus haut. Cela demande un peu plus de gymnastique pour jongler entre les branches, mais cela procure deux avantages :
+- ne pas mettre en berne la version de recette pendant le temps où l'on travaille à la résolution des conflits entre scripts de mise à jour
+- ne livrer sur la version de recette que des scripts de mise à jour prêts, ce qui permet de la faire évoluer comme ont fait évoluer la version de production. Ainsi, si on a des données de test, pas besoin de reset la base de données.
 
-En cas de conflit ou de refus d'appliquer un script, il faudra mettre à jour le script (au moins en le renommant en upgrade-from-numversion+1.php par exemple).
-
-Pour aller plus loin on pourra : 
-
-- lorsqu'on détecte un nouveau scripts, alerter si son numversion est < numversion de la base de données
-- lorsqu'on détecte un nouveau scripts, alerter si son numversion est > numversion de la base de données 
-- utiliser les hooks de Git pour refuser un commit sur `master` qui impliquerait d'appliquer des scripts si ils ne sont pas en cohérence avec la base de données.
+On nommera cette branche `integ`. On merge dans cette branche tout ce qui doit aller dans `devel`, et on ne merge plus rien dans `devel` hormis ce qui vient de la branche `integ`.
