@@ -122,7 +122,7 @@ Considérons le cas où l'on a deux branches qui contiennent un script de mise �
 
 Lorsqu'on va vouloir mettre en recette ces deux branches, git va lever un conflit puisque les deux scripts ont le même nom. La résolution de ce conflit __ne doit pas changer le nom du fichier__ de mise à jour. Au contraire, elle doit s'assurer d'intégrer harmonieusement les deux scripts en conflit.
 
-Lorsqu'on mettra en production l'une de ces branches, et qu'on ira remerger master dans l'autre branche pour la tenir à jour (ce qu'on doit faire comme expliqué dans la section précédente nommée "Philosophie"), git va nous informer d'un conflit : on a sur master un fichier déjà nommé comme notre script de mise à jour. C'est à ce moment là seulement qu'on __renommera notre fichier de mise à jour en incrémentant son numéro__, après éventuelles adaptations.
+Lorsqu'on mettra en production l'une de ces branches, et qu'on ira remerger master dans l'autre branche pour la tenir à jour (ce qu'on doit faire comme expliqué dans la section précédente nommée [Philosophie](https://github.com/pa-de-solminihac/git-workflow/blob/master/README.md#philosophie)), git va nous informer d'un conflit : on a sur master un fichier déjà nommé comme notre script de mise à jour. C'est à ce moment là seulement qu'on __renommera notre fichier de mise à jour en incrémentant son numéro__, après éventuelles adaptations.
 
 #### Raffinement
 
@@ -132,4 +132,4 @@ On peut utiliser une branche intermédiaire entre les branches `master` et `deve
 
 On nommera cette branche `integ`. On merge dans cette branche tout ce qui doit aller dans `devel`, et on ne merge plus rien dans `devel` hormis ce qui vient de la branche `integ`.
 
-Bien entendu, on ne doit alors __jamais merger `integ` dans `master`__ (tout comme on ne doit jamais merger `devel` dans `master`, que ce soit directement ou indirectement en mergeant une branche qui en diverge).
+__Attention :__ comme vu précédemment dans la section [Avertissement](https://github.com/pa-de-solminihac/git-workflow/blob/master/README.md#avertissement), on ne doit alors __jamais merger `integ` dans `master`__ (tout comme on ne doit jamais merger `devel` dans `master`, que ce soit directement ou indirectement en mergeant une branche qui en diverge).
