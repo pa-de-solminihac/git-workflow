@@ -131,3 +131,5 @@ On peut utiliser une branche intermédiaire entre les branches `master` et `deve
 - ne livrer sur la version de recette que des scripts de mise à jour prêts, ce qui permet de la faire évoluer comme ont fait évoluer la version de production. Ainsi, si on a des données de test, pas besoin de reset la base de données.
 
 On nommera cette branche `integ`. On merge dans cette branche tout ce qui doit aller dans `devel`, et on ne merge plus rien dans `devel` hormis ce qui vient de la branche `integ`.
+
+Bien entendu, on ne doit alors __jamais merger `integ` dans `master`__ (tout comme on ne doit jamais merger `devel` dans `master`, que ce soit directement ou indirectement en mergeant une branche qui en diverge).
