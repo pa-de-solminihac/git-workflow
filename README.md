@@ -122,9 +122,11 @@ Considérons le cas où l'on a deux branches qui contiennent un script de mise �
 
 Lorsqu'on va vouloir mettre en recette ces deux branches (en les mergeant dans `devel`) git va lever un conflit puisque les deux scripts ont le même nom. La résolution de ce conflit __ne doit pas changer le nom du fichier__ de mise à jour. Au contraire, elle doit s'assurer d'intégrer harmonieusement les deux scripts en conflit dans le même fichier.
 
-Il est probable que l'un des deux scripts de mise à jour aura déjà été appliqué sur la version de recette de l'application. La résolution du conflit doit donc s'assurer que le script soit rejouable à la fois sur la version de recette (sans appliquer à nouveau ce qui a déjà été appliqué) et sur les versions sur lesquelles le script n'a pas encore été appliqué. Heureusement, comme on utilise ici un script `php` (et pas juste un script `sql` brut) on peut le faire assez facilement, en mettant le script déjà appliqué dans un `if ($test_si_script_deja_applique) { ... }`.
+Il est alors probable que l'un des deux scripts de mise à jour aura déjà été appliqué sur la version de recette de l'application. La résolution du conflit doit donc s'assurer que le script soit rejouable à la fois sur la version de recette (sans appliquer à nouveau ce qui a déjà été appliqué) et sur les versions sur lesquelles le script n'a pas encore été appliqué.
 
-L'outil appliquant la mise à jour automatiquement évoqué plus haut pourra fournir des fonctions utilitaires pour réaliser facilement le test `$test_si_script_deja_applique` (par exemple des fonctions `table_exists($table)`, `field_exists($table, $field)`, `field_is_type($table, $field, $type)`, etc...)
+Heureusement, comme on utilise ici un script `php` (et pas juste un script `sql` brut) on peut le faire assez facilement, en mettant le script déjà appliqué dans un `if ($test_si_script_deja_applique) { ... }`.
+
+Pour réaliser facilement le test `$test_si_script_deja_applique`, l'outil appliquant la mise à jour automatiquement évoqué plus haut pourra fournir des fonctions utilitaires : `table_exists($table)`, `field_exists($table, $field)`, `field_is_type($table, $field, $type)`, etc...
 
 #### Mise en production
 
