@@ -118,7 +118,9 @@ Ces scripts :
 
 ### Détecter les conflits entre deux scripts de migration
 
-Considérons le cas où l'on a deux branches qui contiennent un script de mise à jour de base de données ayant le même nom.
+#### Avant passage en recette
+
+Considérons le cas où l'on a deux feature branches qui contiennent un script de mise à jour de base de données ayant le même nom.
 
 Lorsqu'on va vouloir mettre en recette ces deux branches (en les mergeant dans `devel`) git va lever un conflit puisque les deux scripts ont le même nom. La résolution de ce conflit __ne doit pas changer le nom du fichier__ de mise à jour. Au contraire, elle doit s'assurer d'intégrer harmonieusement les deux scripts en conflit dans le même fichier.
 
@@ -128,6 +130,6 @@ Heureusement, comme on utilise ici un script `php` (et pas juste un script `sql`
 
 Pour réaliser facilement le test `$test_si_script_deja_applique`, l'outil appliquant la mise à jour automatiquement évoqué plus haut pourra fournir des fonctions utilitaires : `table_exists($table)`, `field_exists($table, $field)`, `field_is_type($table, $field, $type)`, etc...
 
-#### Mise en production
+#### Après mise en production
 
 Lorsqu'on mettra en production l'une de ces branches, et qu'on ira remerger master dans l'autre branche pour la tenir à jour (ce qu'on doit faire comme expliqué dans la section précédente nommée [Philosophie](https://github.com/pa-de-solminihac/git-workflow/blob/master/README.md#philosophie)), git va nous informer d'un conflit : on a sur master un fichier déjà nommé comme notre script de mise à jour. C'est à ce moment là seulement qu'on __renommera notre fichier de mise à jour en incrémentant son numéro__, après éventuelles adaptations.
