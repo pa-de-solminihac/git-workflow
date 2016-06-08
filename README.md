@@ -116,20 +116,16 @@ Ces scripts :
 - commencent par `SET NAMES 'utf8';`
 - ne doivent pas faire apparaître le nom de la base de donnée dans les requêtes
 
-### Gestion des conflits
+### Détecter les conflits entre deux scripts de migration
 
 Considérons le cas où l'on a deux branches qui contiennent un script de mise à jour de base de données ayant le même nom.
 
-Lorsqu'on va vouloir mettre en recette ces deux branches, git va lever un conflit puisque les deux scripts ont le même nom. La résolution de ce conflit __ne doit pas changer le nom du fichier__ de mise à jour. Au contraire, elle doit s'assurer d'intégrer harmonieusement les deux scripts en conflit.
+Lorsqu'on va vouloir mettre en recette ces deux branches (en les mergeant dans `devel`) git va lever un conflit puisque les deux scripts ont le même nom. La résolution de ce conflit __ne doit pas changer le nom du fichier__ de mise à jour. Au contraire, elle doit s'assurer d'intégrer harmonieusement les deux scripts en conflit dans le même fichier.
+
+Il est probable que l'un des deux scripts de mise à jour aura déjà été appliqué sur la version de recette de l'application. La résolution du conflit doit donc s'assurer que le script soit rejouable à la fois sur la version de recette (sans appliquer à nouveau ce qui a déjà été appliqué) et sur les versions sur lesquelles le script n'a pas encore été appliqué. Heureusement, comme on utilise ici un script `php` (et pas juste un script `sql` brut) on peut le faire assez facilement, en mettant le script déjà appliqué dans un `if ($test_si_script_deja_applique) { ... }`.
+
+L'outil appliquant la mise à jour automatiquement évoqué plus haut pourra fournir des fonctions utilitaires pour réaliser facilement le test `$test_si_script_deja_applique` (par exemple des fonctions `table_exists($table)`, `field_exists($table, $field)`, `field_is_type($table, $field, $type)`, etc...)
+
+#### Mise en production
 
 Lorsqu'on mettra en production l'une de ces branches, et qu'on ira remerger master dans l'autre branche pour la tenir à jour (ce qu'on doit faire comme expliqué dans la section précédente nommée [Philosophie](https://github.com/pa-de-solminihac/git-workflow/blob/master/README.md#philosophie)), git va nous informer d'un conflit : on a sur master un fichier déjà nommé comme notre script de mise à jour. C'est à ce moment là seulement qu'on __renommera notre fichier de mise à jour en incrémentant son numéro__, après éventuelles adaptations.
-
-#### Raffinement
-
-On peut utiliser une branche intermédiaire entre les branches `master` et `devel` évoquées plus haut. Cela demande un peu plus de gymnastique pour jongler entre les branches, mais cela procure deux avantages :
-- ne pas mettre en berne la version de recette pendant le temps où l'on travaille à la résolution des conflits entre scripts de mise à jour
-- ne livrer sur la version de recette que des scripts de mise à jour prêts, ce qui permet de la faire évoluer comme ont fait évoluer la version de production. Ainsi, si on a des données de test, pas besoin de reset la base de données.
-
-On nommera cette branche `integ`. On merge dans cette branche tout ce qui doit aller dans `devel`, et on ne merge plus rien dans `devel` hormis ce qui vient de la branche `integ`.
-
-__Attention :__ comme vu précédemment dans la section [Avertissement](https://github.com/pa-de-solminihac/git-workflow/blob/master/README.md#avertissement), on ne doit alors __jamais merger `integ` dans `master`__ (tout comme on ne doit jamais merger `devel` dans `master`, que ce soit directement ou indirectement en mergeant une branche qui en diverge).
