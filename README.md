@@ -109,7 +109,7 @@ Ainsi, la base de données doit contenir son propre numéro de version. L'outil 
 Les scripts de mise à jour sont enregistrés :
 - dans la feature branch qui les nécessite
 - dans un dossier `database/updates` 
-- dans un fichier de la forme `n+1.sql` ou `n` est le numéro de version de la base de données sur laquelle le script doit s'appliquer
+- dans un fichier nommé selon la forme `n+1.php` ou `n` est le numéro de version de la base de données sur laquelle le script doit s'appliquer
 
 Ces scripts :
 - sont au format UTF-8 sans BOM, avec retours à la ligne de type unix
