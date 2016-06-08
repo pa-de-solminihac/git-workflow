@@ -1,11 +1,20 @@
 # Modèle d'utilisation de Git
 
-Modèle d'utilisation de Git pour un workflow avec versions de développement, recette, et production.
+Modèle d'utilisation de Git pour un workflow avec versions de développement, recette, et production (et gestion des migrations de base de données).
 
-__Attention__ : sauf mention contraire, les lignes de commandes ci-dessous sont à exécuter sur les versions des développeurs (donc jamais sur la version de recette et encore moins la version de production !)
+
+## Philosophie
+
+Dans ce modèle, chaque développement se fait est sa propre branche (on parle de `feature_branches`), __qui diverge de `master`__ et non de `devel` comme on le voit dans beaucoup d'autres modèles.
+
+Ainsi, __chaque développement reste livrable directement__, indépendamment des autres. Pas besoin d'attendre qu'un autre développement soit terminé. Naturellement, plus le temps passe, plus les `feature_branches` s'éloignent de `master`. Pour qu'elles restent toujours livrables, il faut donc les tenir à jour par rapport à `master`. Autrement dit, régulièrement re-merger `master` dans les `feature_branches` qui en dérivent.
+
+On évite aussi d'avoir à résoudre plusieurs fois le même conflit dans plusieurs branches, puisqu'on le fait systématiquement dans les étapes de mise en recette et mise en production.
 
 
 ## Développement dans des branches
+
+__Attention__ : sauf mention contraire, les lignes de commandes ci-dessous sont à exécuter sur les versions des développeurs (donc jamais sur la version de recette et encore moins la version de production !)
 
 Le code est versionné en utilisant git en suivant le modèle suivant : 
 - la branche `master` correspond à la version de production
@@ -89,15 +98,6 @@ Une fois qu'on a mis notre `feature_branch` en production, on peut la supprimer 
 ```bash
 git branch -d 123_ma_feature
 ```
-
-
-## Philosophie
-
-Dans ce modèle, les `feature_branches` divergent `de master`. Cela permet d'avoir des branches toujours livrables, indépendamment les unes des autres. 
-
-Naturellement, plus on attend, plus elles s'éloignent de `master`. Pour qu'elles restent toujours livrables, il faut les tenir à jour par rapport à `master`. Autrement dit, régulièrement re-merger master dans les `feature_branches` qui en dérivent.
-
-Cela évite aussi d'avoir à résoudre plusieurs fois le même conflit dans plusieurs branches, je le fais systématiquement dans les étapes de mise en recette et mise en production.
 
 
 ## Mises à jour de la base de données
